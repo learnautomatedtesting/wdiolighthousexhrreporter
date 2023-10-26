@@ -30,6 +30,15 @@ class XHRhelper {
                 duration: duration * 1000,
                 requestHeaders: requestInfo.headers
             });
+
+            // If the status code is not 200, push it to xhrErrors
+            if (params.response.status !== 200) {
+                xhrErrors.push({
+                    apiName: params.response.url,
+                    errorCode: params.response.status,
+                    errorMessage: params.response.statusText
+                });
+            }
             delete pendingRequests[params.requestId];
         }
     });
@@ -63,6 +72,10 @@ class XHRhelper {
             timeout: 30000,
             timeoutMsg: 'XHRs did not finish within the expected time.'
         });
+    }
+
+    getXHRErrors() {
+        return xhrErrors;
     }
 
     resetXHRData() {

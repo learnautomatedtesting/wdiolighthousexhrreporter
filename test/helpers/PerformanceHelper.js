@@ -3,7 +3,7 @@ import XHRHelper from './XHRHelper.js';
 
 class PerformanceHelper {
 
-    async captureAndAggregatePerformanceData(strvalue) {
+    async captureAndAggregatePerformanceData(strvalue,specificAPIEndpointSegment = null) {
         const currentUrl = await browser.getUrl();
 
         if (!currentUrl || currentUrl === 'about:blank') {
@@ -26,6 +26,21 @@ class PerformanceHelper {
 
         // Fetching XHR data
         const xhrData = await XHRHelper.getXHRData();
+
+
+      
+        if (specificAPIEndpointSegment) {
+            // Check for errors in XHRs that match the specific segment
+            const xhrErrors = xhrData.filter(entry => 
+                entry.url.includes(specificAPIEndpointSegment) && entry.statusCode !== 200
+            );
+
+            if (xhrErrors.length) {
+                const error = xhrErrors[0];  // or process multiple errors if necessary
+                console.error(`Error detected in API: ${error.url}. Status Code: ${error.statusCode}.`);
+                return { error: true, errorMessage: `Error detected in API: ${error.url}` };
+            }
+        }
         console.log("xhrDatais:" + xhrData);
 
         // Resetting XHR data (optional, based on your original code)

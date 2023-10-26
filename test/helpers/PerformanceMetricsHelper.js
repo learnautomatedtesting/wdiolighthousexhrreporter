@@ -4,13 +4,22 @@ import XHRHelper from './XHRHelper.js';
 
 export default class PerformanceMetricsHelper {
 
-    static async captureAndAggregatePerformanceData(testStepName, captureLighthouse = true, captureXHR = true) {
+    static async captureAndAggregatePerformanceData(testStepName, captureLighthouse = true, captureXHR = true,specificAPIEndpoint) {
         let aggregatedData = {};
         let lighthouseMetrics = null;
-
+        let performanceData
         if (captureXHR) {
-            const performanceData = await PerformanceHelper.captureAndAggregatePerformanceData(testStepName);
+            performanceData = await PerformanceHelper.captureAndAggregatePerformanceData(testStepName, specificAPIEndpoint);
             aggregatedData = { ...aggregatedData, ...performanceData };
+            
+            // Check for the error immediately after getting the performanceData
+            if (performanceData.error) {
+                // Reset the XHR data before exiting
+                await XHRHelper.resetXHRData();
+                
+                console.error(performanceData.errorMessage);
+                return null;  // Exit the function without throwing an error
+            }
         }
 
         if (captureLighthouse) {
